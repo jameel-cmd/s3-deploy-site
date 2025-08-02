@@ -17,10 +17,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install & Build
+           - name: Upload files to S3
         run: |
-          npm install
-          npm run build  # Must output files to ./dist
+          aws s3 sync ./public s3://$S3_BUCKET --delete
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
