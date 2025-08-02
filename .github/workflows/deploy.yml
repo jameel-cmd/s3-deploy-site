@@ -1,32 +1,41 @@
-name: Deploy to S3
+name: Deploy Static Site to S3
 
 on:
   push:
     branches:
-      - main
+      - main  # deploy only on pushes to main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
+      AWS_REGION: us-east-1
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
       CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Optional: Build step for your site (uncomment if you have a build process)
+      # - name: Build project
+      #   run: |
+      #     npm install
+      #     npm run build
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Sync files to S3
         run: |
-          aws s3 sync ./dist s3://${{ secrets.S3_BUCKET }} --delete
+          aws s3 sync ./dist s3://$S3_BUCKET --delete
+        # If your files are not in ./dist, change the path accordingly, e.g., ./public
 
-      - name: Invalidate CloudFront cache (if distribution ID is set)
+      - name: Invalidate CloudFront cache (optional)
         if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
         run: |
           aws cloudfront create-invalidation \
