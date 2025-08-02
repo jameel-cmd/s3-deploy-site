@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-           - name: Upload files to S3
+        - name: Upload files to S3
         run: |
           aws s3 sync ./public s3://$S3_BUCKET --delete
 
