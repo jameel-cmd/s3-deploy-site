@@ -1,4 +1,4 @@
-name: Deploy Static Site to S3
+name: Deploy Static HTML Site to S3
 
 on:
   push:
@@ -17,11 +17,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # REMOVE this step if you're not using a /public folder
-      - name: Upload files to S3 (from public)
-        run: |
-          aws s3 sync ./public s3://$S3_BUCKET --delete
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -29,9 +24,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Sync files to S3 (from dist)
+      - name: Sync files to S3
         run: |
-          aws s3 sync ./dist s3://$S3_BUCKET --delete
+          aws s3 sync . s3://$S3_BUCKET --delete --exclude ".git/*" --exclude ".github/*"
 
       - name: Invalidate CloudFront cache (optional)
         if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
